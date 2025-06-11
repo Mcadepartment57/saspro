@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Dashboard</title>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.4.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-funnel@2.0.2/dist/chart.funnel.min.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #a5b4fc 0%, #c084fc 25%, #e9d5ff 50%, #f3e8ff 75%, #fdf4ff 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+
+        }
+
+        /* Section Styling */
+.pending-orders-section {
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #ffffff;
+    border-radius: 1rem;
+    border: 1px solid rgba(203, 213, 225, 0.3);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.pending-orders-section:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Section Header */
+.section-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(203, 213, 225, 0.5);
+}
+
+.section-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.section-header h2 i {
+    color: #8b5cf6;
+}
+
+/* Table Wrapper for Scrollability */
+.table-wrapper {
+    position: relative;
+    overflow-x: auto;
+    border-radius: 0.75rem;
+    background: #ffffff;
+}
+
+/* Modern Table Styling */
+.modern-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 800px;
+    background: #ffffff;
+    border-radius: 0.75rem;
+    overflow: hidden;
+}
+
+/* Table Header */
+.table-header {
+    background: linear-gradient(90deg, #8b5cf6 0%, #a855f7 100%);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+th {
+    color: #ffffff;
+    font-weight: 600;
+    padding: 1rem 1.25rem;
+    text-align: left;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Table Rows and Cells */
+td {
+    padding: 1rem 1.25rem;
+    text-align: left;
+    color: #1e293b;
+    font-size: 0.9rem;
+    border-bottom: 1px solid rgba(203, 213, 225, 0.5);
+}
+
+/* Alternating Row Colors */
+tr:nth-child(even) {
+    background-color: #f8fafc;
+}
+
+tr:nth-child(odd) {
+    background-color: #ffffff;
+}
+
+/* Row Hover Effect */
+tr:hover {
+    background-color: #f1f5f9;
+    transition: background-color 0.3s ease;
+}
+
+/* Action Button (View Details) */
+.text-blue-500 {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+    color: #ffffff;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+    text-decoration: none;
+}
+
+.text-blue-500:hover {
+    background: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%);
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+}
+
+/* Error and Status Text Colors */
+.text-green-500 {
+    color: #10b981;
+}
+
+.text-yellow-500 {
+    color: #f59e0b;
+}
+
+.text-red-500 {
+    color: #ef4444;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .pending-orders-section {
+        padding: 1rem;
+    }
+
+    .section-header h2 {
+        font-size: 1.25rem;
+    }
+
+    th, td {
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+    }
+
+    .text-blue-500 {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .section-header h2 {
+        font-size: 1rem;
+    }
+
+    th, td {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.75rem;
+    }
+
+    .text-blue-500 {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.7rem;
+    }
+}
+
+        .main-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 1rem;
+            flex-grow: 1;
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid rgba(167, 139, 250, 0.2);
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.1);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-header:hover {
+            box-shadow: 0 8px 20px rgba(139, 92, 246, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .dashboard-header h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1e293b 0%, #6366f1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .dashboard-nav {
+            color: #475569;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .dashboard-nav a {
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-nav a::before {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(135deg, #8b5cf6, #a855f7);
+            transition: width 0.3s ease;
+        }
+
+        .dashboard-nav a:hover {
+            color: #8b5cf6;
+            transform: translateY(-2px);
+        }
+
+        .dashboard-nav a:hover::before {
+            width: 100%;
+        }
+
+        .filter-btn {
+            background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #c084fc 100%);
+            background-size: 200% 200%;
+            color: #ffffff;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+
+        .filter-btn:hover {
+            background-position: 100% 0;
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
+        }
+
+        .filter-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #ffffff 0%, #faf5ff 100%);
+            border: 1px solid rgba(167, 139, 250, 0.2);
+            border-radius: 0.75rem;
+            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.2);
+            padding: 1.25rem;
+            z-index: 1000;
+            width: 95%;
+            max-width: 450px;
+            animation: fadeInScale 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .filter-popup.show {
+            display: block;
+        }
+
+        .filter-popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(168, 85, 247, 0.2) 100%);
+            backdrop-filter: blur(8px);
+            z-index: 999;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .filter-popup-overlay.show {
+            display: block;
+        }
+
+        .dashboard-layout {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        /* Scoped Side Card Styling */
+        .side-card-container .side-card {
+            background: linear-gradient(145deg, #ffffff 0%, #f9f9ff 100%);
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 6px 20px rgba(107, 114, 128, 0.1);
+            padding: 1.75rem;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            flex: 1 1 280px; /* Increased min-width for more space */
+            max-width: 320px;
+            min-width: 280px;
+            min-height: 2000px; /* Ensures cards are tall enough */
+            margin: 0.5rem 0;
+        }
+
+        .side-card-container .side-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #7c3aed 0%, #a855f7 50%, #d8b4fe 100%);
+            background-size: 200% 200%;
+            animation: gradientFlow 4s ease infinite;
+            border-radius: 1rem 1rem 0 0;
+        }
+
+        .side-card-container .side-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 24px rgba(107, 114, 128, 0.15);
+            background: linear-gradient(145deg, #ffffff 0%, #f3e8ff 100%);
+        }
+
+        .side-card-container .side-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(167, 139, 250, 0.15);
+        }
+
+        .side-card-container .side-card h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #1e293b 0%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            letter-spacing: 0.02em;
+        }
+
+        .side-card-container .side-card .time-filter {
+            border: 1px solid rgba(167, 139, 250, 0.25);
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+            font-size: 0.85rem;
+            background: #ffffff;
+            color: #1e293b;
+            width: 130px;
+            transition: all 0.3s ease;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+            background-size: 1em;
+        }
+
+        .side-card-container .side-card .time-filter:focus {
+            border-color: #7c3aed;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+            background: #f9f9ff;
+        }
+
+        .side-card-container .side-card ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .side-card-container .side-card .activity-item {
+            display: grid;
+            align-items: center;
+            gap: 1rem;
+            background: linear-gradient(145deg, #ffffff 0%, #f9f9ff 100%);
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+            position: relative;
+            animation: slideIn 0.4s ease;
+            min-width: 0px;
+            max-width: 300px;
+        }
+
+        .side-card-container .side-card .activity-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+            background: linear-gradient(145deg, #f9f9ff 0%, #ede9fe 100%);
+        }
+
+        .side-card-container .side-card .activity-item.order {
+            border-left: 5px solid #10b981;
+        }
+
+        .side-card-container .side-card .activity-item.customer {
+            border-left: 5px solid #f59e0b;
+        }
+
+        .side-card-container .side-card .activity-icon {
+            font-size: 1.5rem;
+            color: #1e293b;
+            background: rgba(167, 139, 250, 0.1);
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+        }
+
+        .side-card-container .side-card .activity-item:hover .activity-icon {
+            transform: scale(1.1);
+        }
+
+        .side-card-container .side-card .activity-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            min-width: 0;
+            overflow: hidden;
+            overflow-wrap: break-word; /* Allow text to wrap */
+        }
+
+        .side-card-container .side-card .activity-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #1e293b;
+            line-height: 1.4;
+            overflow-wrap: break-word; /* Prevent truncation */
+        }
+
+        .side-card-container .side-card .activity-details {
+            font-size: 0.85rem;
+            color: #6b7280;
+            line-height: 1.4;
+            overflow-wrap: break-word; /* Prevent truncation */
+        }
+
+       
+
+        .side-card-container .side-card .performer-item {
+            display: grid;
+            grid-template-columns: 56px 1fr 70px; /* Adjusted grid for more content space */
+            align-items: center;
+            gap: 1rem;
+            background: linear-gradient(145deg, #ffffff 0%, #f9f9ff 100%);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+            position: relative;
+            animation: slideIn 0.4s ease;
+            min-width: 200px;
+        }
+
+        .side-card-container .side-card .performer-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+            background: linear-gradient(145deg, #f9f9ff 0%, #ede9fe 100%);
+        }
+
+        .side-card-container .side-card .performer-item img {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: 3px solid #7c3aed;
+            object-fit: cover;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .side-card-container .side-card .performer-item:hover img {
+            transform: scale(1.05);
+            border-color: #a855f7;
+        }
+
+        .side-card-container .side-card .performer-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            min-width: 100px;
+            overflow: hidden;
+            overflow-wrap: break-word; /* Allow text to wrap */
+        }
+
+        .side-card-container .side-card .performer-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #1e293b;
+            line-height: 1.4;
+            overflow-wrap: break-word; /* Prevent truncation */
+        }
+
+        .side-card-container .side-card .performer-sales {
+            font-size: 0.85rem;
+            color: #6b7280;
+            line-height: 1.4;
+            overflow-wrap: break-word; /* Prevent truncation */
+        }
+
+        .side-card-container .side-card .performer-progress {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 0.75rem;
+        }
+
+        .side-card-container .side-card .performer-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #7c3aed 0%, #a855f7 100%);
+            transition: width 0.6s ease;
+        }
+
+        .side-card-container .side-card .performer-rank {
+            font-size: 0.85rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #7c3aed 0%, #a855f7 100%);
+            color: #ffffff;
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.4rem;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .side-card-container .side-card .performer-item:hover .performer-rank {
+            transform: scale(1.05);
+        }
+
+        .dashboard-grid {
+            flex: 1 1 0;
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1rem;
+            min-width: 0;
+        }
+
+        .chart-card {
+            background: rgb(250, 250, 250);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.12);
+            padding: 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(135deg, #0ea5e9, #06b6d4, #22d3ee);
+            background-size: 200% 200%;
+            animation: gradientFlow 4s ease infinite;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .chart-card:hover::before {
+            opacity: 1;
+        }
+
+        .chart-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 8px 20px rgba(14, 165, 233, 0.2);
+            background: rgb(248, 253, 249);
+        }
+
+        .chart-card h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #1e293b 0%, #0ea5e9 50%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-top: 0.5rem;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 200px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center; 
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-card {
+            position: relative;
+            border-radius: 1rem;
+            padding: 1rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .metric-card.total-sales {
+            background: linear-gradient(145deg, #34d399 10%, #16a34a 40%, #059669 70%, #34d399 100%);
+            background-size: 200% 200%;
+            animation: gradientFlow 6s ease infinite;
+        }
+
+        .metric-card.avg-order-value {
+            background: linear-gradient(145deg, #60a5fa 10%, #2563eb 40%, #1d4ed8 70%, #60a5fa 100%);
+            background-size: 200% 200%;
+            animation: gradientFlow 6s ease infinite;
+        }
+
+        .metric-card.new-customers {
+            background: linear-gradient(145deg, #facc15 10%, #ca8a04 40%, #a16207 70%, #facc15 100%);
+            background-size: 200% 200%;
+            animation: gradientFlow 6s ease infinite;
+        }
+
+        .metric-card.conversion-rate {
+            background: linear-gradient(145deg, #f472b6 10%, #db2777 40%, #be185d 70%, #f472b6 100%);
+            background-size: 200% 200%;
+            animation: gradientFlow 6s ease infinite;
+        }
+
+        .metric-card.conversion-rate2 {
+            background: linear-gradient(145deg,rgb(164, 215, 10) 10%,rgb(156, 234, 11) 40%,rgb(73, 232, 16) 70%, #f472b6 100%);
+            background-size: 200% 200%;
+            animation: gradientFlow 6s ease infinite;
+        }
+
+        .metric-card.conversion-rate3 {
+            background: linear-gradient(145deg,rgb(19, 1, 11) 10%,rgb(18, 17, 18) 40%,rgb(243, 240, 241) 70%, #f472b6 100%);
+            background-size: 200% 200%;
+            animation: gradientFlow 6s ease infinite;
+        }
+
+        .metric-card:hover {
+            transform: scale(1.03) translateY(-4px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            filter: brightness(1.05);
+        }
+
+        .metric-card h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .metric-card h3 i {
+            font-size: 1.75rem;
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s ease infinite;
+        }
+
+        .metric-value {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 0.75rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .metric-subtext {
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 0.5rem;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .chart-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chart-button {
+            background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #c084fc 100%);
+            background-size: 200% 200%;
+            color: #ffffff;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+        }
+
+        .chart-button:hover {
+            background-position: 100% 0;
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+        }
+
+        .chart-button.disabled {
+            background: linear-gradient(135deg, #d1d5db 0%, #e5e7eb 100%);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .more-options-btn {
+            background: linear-gradient(135deg, #6b7280 0%, #9ca3af 100%);
+            color: #ffffff;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(107, 114, 128, 0.3);
+        }
+
+        .more-options-btn:hover {
+            background: linear-gradient(135deg, #4b5563 0%, #6b7280 100%);
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 4px 12px rgba(107, 114, 128, 0.4);
+        }
+
+        .chart-type-select {
+            border: 1px solid rgba(167, 139, 250, 0.3);
+            border-radius: 0.5rem;
+            padding: 0.375rem;
+            font-size: 0.875rem;
+            background: linear-gradient(135deg, #ffffff 0%, #faf5ff 100%);
+            color: #1e293b;
+            width: 140px;
+            transition: all 0.3s ease;
+        }
+
+        .chart-type-select:focus {
+            border-color: #8b5cf6;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+
+        .options-dropdown {
+            display: none;
+            position: absolute;
+            top: 2.5rem;
+            right: 0.75rem;
+            background: linear-gradient(135deg, #ffffff 0%, #faf5ff 100%);
+            border: 1px solid rgba(167, 139, 250, 0.2);
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15);
+            padding: 1rem;
+            z-index: 10;
+            width: 180px;
+            animation: slideDownScale 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .options-dropdown.show {
+            display: block;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.8) 0%, rgba(168, 85, 247, 0.9) 100%);
+            backdrop-filter: blur(12px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #ffffff 0%, #faf5ff 100%);
+            border: 1px solid rgba(167, 139, 250, 0.2);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            width: 95%;
+            max-width: 1200px;
+            height: 90%;
+            position: relative;
+            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);
+            animation: scaleIn 0.3s ease;
+        }
+
+        .modal-canvas {
+            width: 100%;
+            height: 85%;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+
+        .modal-close:hover {
+            background: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%);
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
+        }
+
+        .loading {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #8b5cf6, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .error-message {
+            display: none;
+            background: linear-gradient(135deg, #ef4444, #f87171);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInScale {
+            from { 
+                opacity: 0; 
+                transform: translate(-50%, -50%) scale(0.9);
+            }
+            to { 
+                opacity: 1; 
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        @keyframes slideDownScale {
+            from { 
+                transform: translateY(-10px) scale(0.95); 
+                opacity: 0; 
+            }
+            to { 
+                transform: translateY(0) scale(1); 
+                opacity: 1; 
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes scaleIn {
+            from { 
+                transform: scale(0.9); 
+                opacity: 0; 
+            }
+            to { 
+                transform: scale(1); 
+                opacity: 1; 
+            }
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1280px) {
+            .dashboard-layout {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            .side-card-container .side-card {
+                flex: 1 1 260px; /* Adjusted for responsiveness */
+            }
+            .dashboard-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+            .metric-card {
+                flex: 1 1 200px;
+                min-height: 160px;
+            }
+            .chart-container {
+                height: 180px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-layout {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .side-card-container .side-card {
+                max-width: 100%;
+                margin-bottom: 1rem;
+            }
+            .dashboard-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            .metric-card {
+                flex: 1 1 auto;
+                min-width: 200px;
+                min-height: 140px;
+            }
+            .chart-card {
+                min-width: 0;
+            }
+            .chart-container {
+                height: 160px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 0.75rem;
+            }
+            .dashboard-header h1 {
+                font-size: 1.125rem;
+            }
+            .dashboard-nav a {
+                font-size: 0.75rem;
+            }
+            .dashboard-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .metric-card {
+                padding: 1rem;
+                min-height: 120px;
+            }
+            .metric-value {
+                font-size: 1.25rem;
+            }
+            .chart-container {
+                height: 150px;
+            }
+            .chart-type-select {
+                width: 100px;
+                font-size: 0.75rem;
+            }
+            .chart-card h3 {
+                font-size: 0.875rem;
+            }
+            .metric-card h3 {
+                font-size: 0.75rem;
+            }
+            .metric-card h3 i {
+                font-size: 1.25rem;
+                width: 32px;
+                height: 32px;
+            }
+            .filter-popup {
+                width: 90%;
+                max-width: 360px;
+                padding: 1rem;
+            }
+            .side-card-container .side-card .time-filter {
+                width: 100px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            .metric-card {
+                min-width: 0;
+                min-height: 100px;
+            }
+            .chart-container {
+                height: 140px;
+            }
+            .chart-type-select {
+                width: 90px;
+                font-size: 0.7rem;
+            }
+            .metric-value {
+                font-size: 1.125rem;
+            }
+            .metric-card h3 i {
+                font-size: 1rem;
+                width: 28px;
+                height: 28px;
+            }
+            .filter-btn {
+                padding: 0.4rem 0.6rem;
+            }
+            .modal-content {
+                width: 98%;
+                height: 95%;
+                padding: 1rem;
+            }
+            .side-card-container .side-card .time-filter {
+                width: 90px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <h1>Sales Dashboard</h1>
+            <div class="dashboard-nav">
+                <a href="#">Settings</a>
+                <button class="filter-btn" id="filterBtn" title="Filters">
+                    <i class="fas fa-filter"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Filter Popup -->
+        <div class="filter-popup-overlay" id="filterPopupOverlay"></div>
+        <div class="filter-popup" id="filterPopup">
+            <h2 class="text-lg font-semibold text-gray-800 mb-4">Filters</h2>
+            <div class="flex flex-col gap-4">
+                <div>
+                    <label for="periodType" class="block text-sm font-medium text-gray-700">Period Type:</label>
+                    <select id="periodType" class="border rounded p-2 w-full text-sm">
+                        <option value="MS">Monthly</option>
+                        <option value="QS">Quarterly</option>
+                        <option value="YS">Yearly</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="startDate" class="block text-sm font-medium text-gray-700">Start Date:</label>
+                    <input type="date" id="startDate" class="border rounded p-2 w-full text-sm" value="2024-01-01">
+                </div>
+                <div>
+                    <label for="endDate" class="block text-sm font-medium text-gray-700">End Date:</label>
+                    <input type="date" id="endDate" class="border rounded p-2 w-full text-sm" value="2025-12-31">
+                </div>
+                <div>
+                    <label for="forecastStart" class="block text-sm font-medium text-gray-700">Forecast Start:</label>
+                    <input type="date" id="forecastStart" class="border rounded p-2 w-full text-sm" value="2026-01-01">
+                </div>
+                <div>
+                    <label for="regionSelect" class="block text-sm font-medium text-gray-700">Region:</label>
+                    <select id="regionSelect" class="border rounded p-2 w-full text-sm">
+                        <option value="all">All Regions</option>
+                    </select>
+                </div>
+                <div class="flex gap-2">
+                    <button id="applyFilters" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm">Apply</button>
+                    <button id="resetFilters" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 text-sm">Reset</button>
+                    <button id="closeFilterPopup" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 text-sm">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Layout -->
+        <div class="dashboard-layout">
+            <!-- Left Side Panel -->
+            <div class="side-card-container">
+                <div class="side-card">
+                    <div class="side-card-header">
+                        <h3><i class="fas fa-history"></i> Recent Activity</h3>
+                        <select class="time-filter" id="recentActivityFilter">
+                            <option value="today">Today</option>
+                            <option value="yesterday">Yesterday</option>
+                            <option value="this-week">This Week</option>
+                            <option value="this-month">This Month</option>
+                        </select>
+                    </div>
+                    <ul id="recent-activity">
+                        <li class="activity-item order">
+                            <i class="fas fa-shopping-cart activity-icon"></i>
+                            <div class="activity-content">
+                                <div class="activity-title">Order 60 by Customer ID 17</div>
+                                <div class="activity-details">$210,000.00 on 2025-05-15</div>
+                            </div>
+                        </li>
+                        <li class="activity-item customer">
+                            <i class="fas fa-user-plus activity-icon"></i>
+                            <div class="activity-content">
+                                <div class="activity-title">New Customer</div>
+                                <div class="activity-details">Jane Smith registered</div>
+                            </div>
+                            <div class="activity-time">10 mins ago</div>
+                        </li>
+                        <li class="activity-item order">
+                            <i class="fas fa-shopping-cart activity-icon"></i>
+                            <div class="activity-content">
+                                <div class="activity-title">Order 61 by Customer ID 22</div>
+                                <div class="activity-details">$150,000.00 on 2025-05-15</div>
+                            </div>
+                            <div class="activity-time">30 mins ago</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Main Dashboard Grid -->
+            <div class="dashboard-grid">
+                <!-- Metric Cards -->
+                <div class="metric-card total-sales col-span-4">
+                    <h3><i class="fas fa-dollar-sign"></i> Total Sales</h3>
+                    <div class="metric-value" id="total-sales">Loading...</div>
+                    <div class="metric-subtext" id="total-sales-subtext">Fetching data...</div>
+                    <div class="error-message" id="total-sales-error"></div>
+                </div>
+                <div class="metric-card avg-order-value col-span-4">
+                    <h3><i class="fas fa-shopping-cart"></i> Average Order Value</h3>
+                    <div class="metric-value" id="avg-order-value">Loading...</div>
+                    <div class="metric-subtext" id="avg-order-value-subtext">Fetching data...</div>
+                    <div class="error-message" id="avg-order-value-error"></div>
+                </div>
+                <div class="metric-card new-customers col-span-4">
+                    <h3><i class="fas fa-users"></i> New Customers</h3>
+                    <div class="metric-value" id="new-customers">Loading...</div>
+                    <div class="metric-subtext" id="new-customers-subtext">Fetching data...</div>
+                    <div class="error-message" id="new-customers-error"></div>
+                </div>
+                <div class="metric-card conversion-rate col-span-4">
+                    <h3><i class="fas fa-chart-line"></i> Conversion Rate</h3>
+                    <div class="metric-value" id="conversion-rate">Loading...</div>
+                    <div class="metric-subtext" id="conversion-rate-subtext">Fetching data...</div>
+                    <div class="error-message" id="conversion-rate-error"></div>
+                </div>
+                <div class="metric-card conversion-rate2 col-span-4">
+                    <h3><i class="fas fa-search"></i> sample card</h3>
+                    <div class="metric-value" id="conversion-rate">50%</div>
+                    <div class="metric-subtext" id="conversion-rate-subtext">Fetching data...</div>
+                    <div class="error-message" id="conversion-rate-error"></div>
+                </div>
+                <div class="metric-card conversion-rate3 col-span-4">
+                    <h3><i class="fas fa-search"></i> sample card</h3>
+                    <div class="metric-value" id="conversion-rate">100%</div>
+                    <div class="metric-subtext" id="conversion-rate-subtext">Fetching data...</div>
+                    <div class="error-message" id="conversion-rate-error"></div>
+                </div>
+
+
+                <!-- Chart Cards -->
+                <div class="chart-card col-span-6">
+                    <div class="chart-header">
+                        <select class="chart-type-select" data-chart-id="salesTrendChart">
+                            <option value="line">Line</option>
+                            <option value="bar">Bar</option>
+                            <option value="area">Area</option>
+                        </select>
+                        <div class="chart-buttons">
+                            <button class="chart-button fullscreen-btn" data-chart-id="salesTrendChart">⛶</button>
+                            <button class="more-options-btn" data-chart-id="salesTrendChart"><i class="fas fa-ellipsis-v"></i></button>
+                        </div>
+                    </div>
+                    <h3>Sales Trend</h3>
+                    <div class="options-dropdown" data-chart-id="salesTrendChart">
+                        <div class="flex flex-col gap-2">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Select a Date:</label>
+                                <select class="border rounded p-2 w-full text-sm chart-date-select">
+                                    <option value="">Select Date</option>
+                                </select>
+                            </div>
+                            <button class="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 apply-chart-filter" data-chart-id="salesTrendChart">Apply</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="salesTrendChart"></canvas>
+                        <div id="chartLoading" class="loading">Loading...</div>
+                    </div>
+                    <div id="sales-trend-error" class="error-message"></div>
+                </div>
+
+                <div class="chart-card col-span-6">
+                    <div class="chart-header">
+                        <select class="chart-type-select" data-chart-id="salesRegionChart">
+                            <option value="bar">Bar</option>
+                            <option value="pie">Pie</option>
+                            <option value="doughnut">Doughnut</option>
+                        </select>
+                        <div class="chart-buttons">
+                            <button class="chart-button fullscreen-btn" data-chart-id="salesRegionChart">⛶</button>
+                            <button class="more-options-btn" data-chart-id="salesRegionChart"><i class="fas fa-ellipsis-v"></i></button>
+                        </div>
+                    </div>
+                    <h3>Sales by Region</h3>
+                    <div class="options-dropdown" data-chart-id="salesRegionChart">
+                        <div class="flex flex-col gap-2">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Select a Date:</label>
+                                <select class="border rounded p-2 w-full text-sm chart-date-select">
+                                    <option value="">Select Date</option>
+                                </select>
+                            </div>
+                            <button class="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 apply-chart-filter" data-chart-id="salesRegionChart">Apply</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="salesRegionChart"></canvas>
+                        <div id="regionChartLoading" class="loading">Loading...</div>
+                    </div>
+                    <div id="sales-region-error" class="error-message"></div>
+                </div>
+
+                <div class="chart-card col-span-4">
+                    <div class="chart-header">
+                        <select class="chart-type-select" data-chart-id="salesFunnelChart">
+                            <option value="funnel">Funnel</option>
+                            <option value="bar">Bar</option>
+                        </select>
+                        <div class="chart-buttons">
+                            <button class="chart-button fullscreen-btn" data-chart-id="salesFunnelChart">⛶</button>
+                            <button class="more-options-btn" data-chart-id="salesFunnelChart"><i class="fas fa-ellipsis-v"></i></button>
+                        </div>
+                    </div>
+                    <h3>Sales Funnel</h3>
+                    <div class="options-dropdown" data-chart-id="salesFunnelChart">
+                        <div class="flex flex-col gap-2">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Select a Date:</label>
+                                <select class="border rounded p-2 w-full text-sm chart-date-select">
+                                    <option value="">Select Date</option>
+                                </select>
+                            </div>
+                            <button class="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 apply-chart-filter" data-chart-id="salesFunnelChart">Apply</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="salesFunnelChart"></canvas>
+                        <div id="funnelLoading" class="loading">Loading...</div>
+                    </div>
+                    <div id="sales-funnel-error" class="error-message"></div>
+                </div>
+
+                <div class="chart-card col-span-4">
+                    <div class="chart-header">
+                        <select class="chart-type-select" data-chart-id="salesCustomerChart">
+                            <option value="bar">Bar</option>
+                            <option value="pie">Pie</option>
+                            <option value="doughnut">Doughnut</option>
+                        </select>
+                        <div class="chart-buttons">
+                            <button class="chart-button fullscreen-btn" data-chart-id="salesCustomerChart">⛶</button>
+                            <button class="more-options-btn" data-chart-id="salesCustomerChart"><i class="fas fa-ellipsis-v"></i></button>
+                        </div>
+                    </div>
+                    <h3>Sales by Customer</h3>
+                    <div class="options-dropdown" data-chart-id="salesCustomerChart">
+                        <div class="flex flex-col gap-2">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Select a Date:</label>
+                                <select class="border rounded p-2 w-full text-sm chart-date-select">
+                                    <option value="">Select Date</option>
+                                </select>
+                            </div>
+                            <button class="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 apply-chart-filter" data-chart-id="salesCustomerChart">Apply</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="salesCustomerChart"></canvas>
+                        <div id="customerLoading" class="loading">Loading...</div>
+                    </div>
+                    <div id="sales-customer-error" class="error-message"></div>
+                </div>
+
+                <div class="chart-card col-span-4">
+                    <div class="chart-header">
+                        <select class="chart-type-select" data-chart-id="salesSalespersonChart">
+                            <option value="bar">Bar</option>
+                            <option value="pie">Pie</option>
+                            <option value="doughnut">Doughnut</option>
+                        </select>
+                        <div class="chart-buttons">
+                            <button class="chart-button fullscreen-btn" data-chart-id="salesSalespersonChart">⛶</button>
+                            <button class="more-options-btn" data-chart-id="salesSalespersonChart"><i class="fas fa-ellipsis-v"></i></button>
+                        </div>
+                    </div>
+                    <h3>Sales by Salesperson</h3>
+                    <div class="options-dropdown" data-chart-id="salesSalespersonChart">
+                        <div class="flex flex-col gap-2">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Select a Date:</label>
+                                <select class="border rounded p-2 w-full text-sm chart-date-select">
+                                    <option value="">Select Date</option>
+                                </select>
+                            </div>
+                            <button class="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 apply-chart-filter" data-chart-id="salesSalespersonChart">Apply</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="salesSalespersonChart"></canvas>
+                        <div id="salespersonLoading" class="loading">Loading...</div>
+                    </div>
+                    <div id="sales-salesperson-error" class="error-message"></div>
+                </div>
+
+                <div class="chart-card col-span-6">
+                    <div class="chart-header">
+                        <select class="chart-type-select" data-chart-id="salesTargetAchievementChart">
+                            <option value="bar">Bar</option>
+                            <option value="line">Line</option>
+                        </select>
+                        <div class="chart-buttons">
+                            <button class="chart-button fullscreen-btn" data-chart-id="salesTargetAchievementChart">⛶</button>
+                            <button class="more-options-btn" data-chart-id="salesTargetAchievementChart"><i class="fas fa-ellipsis-v"></i></button>
+                        </div>
+                    </div>
+                    <h3>Sales Target vs Achievement</h3>
+                    <div class="options-dropdown" data-chart-id="salesTargetAchievementChart">
+                        <div class="flex flex-col gap-2">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Select a Date:</label>
+                                <select class="border rounded p-2 w-full text-sm chart-date-select">
+                                    <option value="">Select Date</option>
+                                </select>
+                            </div>
+                            <button class="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 apply-chart-filter" data-chart-id="salesTargetAchievementChart">Apply</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="salesTargetAchievementChart"></canvas>
+                        <div id="targetAchievementLoading" class="loading">Loading...</div>
+                    </div>
+                    <div id="sales-target-error" class="error-message"></div>
+                </div>
+
+                <div class="chart-card col-span-6">
+                    <div class="chart-header">
+                        <select class="chart-type-select" data-chart-id="salesByCategoryChart">
+                            <option value="pie">Pie</option>
+                            <option value="bar">Bar</option>
+                            <option value="doughnut">Doughnut</option>
+                        </select>
+                        <div class="chart-buttons">
+                            <button class="chart-button fullscreen-btn" data-chart-id="salesByCategoryChart">⛶</button>
+                            <button class="more-options-btn" data-chart-id="salesByCategoryChart"><i class="fas fa-ellipsis-v"></i></button>
+                        </div>
+                    </div>
+                    <h3>Sales by Category</h3>
+                    <div class="options-dropdown" data-chart-id="salesByCategoryChart">
+                        <div class="flex flex-col gap-2">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Select a Date:</label>
+                                <select class="border rounded p-2 w-full text-sm chart-date-select">
+                                    <option value="">Select Date</option>
+                                </select>
+                            </div>
+                            <button class="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 apply-chart-filter" data-chart-id="salesByCategoryChart">Apply</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="salesByCategoryChart"></canvas>
+                        <div id="categoryLoading" class="loading">Loading...</div>
+                    </div>
+                    <div id="sales-category-error" class="error-message"></div>
+                </div>
+
+                <div class="chart-card col-span-6">
+                    <div class="chart-header">
+                        <select class="chart-type-select" data-chart-id="salesGrowthRateChart">
+                            <option value="line">Line</option>
+                            <option value="bar">Bar</option>
+                        </select>
+                        <div class="chart-buttons">
+                            <button class="chart-button fullscreen-btn" data-chart-id="salesGrowthRateChart">⛶</button>
+                            <button class="more-options-btn" data-chart-id="salesGrowthRateChart"><i class="fas fa-ellipsis-v"></i></button>
+                        </div>
+                    </div>
+                    <h3>Sales Growth Rate</h3>
+                    <div class="options-dropdown" data-chart-id="salesGrowthRateChart">
+                        <div class="flex flex-col gap-2">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Select a Date:</label>
+                                <select class="border rounded p-2 w-full text-sm chart-date-select">
+                                    <option value="">Select Date</option>
+                                </select>
+                            </div>
+                            <button class="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 apply-chart-filter" data-chart-id="salesGrowthRateChart">Apply</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="salesGrowthRateChart"></canvas>
+                        <div id="growthRateLoading" class="loading">Loading...</div>
+                    </div>
+                    <div id="sales-growth-error" class="error-message"></div>
+                </div>
+
+                <div class="chart-card col-span-6">
+                    <div class="chart-header">
+                        <select class="chart-type-select" data-chart-id="repeatVsNewSalesChart">
+                            <option value="bar">Bar</option>
+                            <option value="pie">Pie</option>
+                            <option value="doughnut">Doughnut</option>
+                        </select>
+                        <div class="chart-buttons">
+                            <button class="chart-button fullscreen-btn" data-chart-id="repeatVsNewSalesChart">⛶</button>
+                            <button class="more-options-btn" data-chart-id="repeatVsNewSalesChart"><i class="fas fa-ellipsis-v"></i></button>
+                        </div>
+                    </div>
+                    <h3>Repeat vs New Customer Sales</h3>
+                    <div class="options-dropdown" data-chart-id="repeatVsNewSalesChart">
+                        <div class="flex flex-col gap-2">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Select a Date:</label>
+                                <select class="border rounded p-2 w-full text-sm chart-date-select">
+                                    <option value="">Select Date</option>
+                                </select>
+                            </div>
+                            <button class="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 apply-chart-filter" data-chart-id="repeatVsNewSalesChart">Apply</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="repeatVsNewSalesChart"></canvas>
+                        <div id="repeatVsNewLoading" class="loading">Loading...</div>
+                    </div>
+                    <div id="repeat-vs-new-error" class="error-message"></div>
+                </div>
+            </div>
+
+            <!-- Right Side Panel -->
+            <div class="side-card-container">
+    <div class="side-card">
+        <div class="side-card-header">
+            <h3><i class="fas fa-trophy"></i> Top Performers</h3>
+            <select class="time-filter" id="topPerformersFilter">
+                <option value="today">Today</option>
+                <option value="yesterday">Yesterday</option>
+                <option value="this-week">This Week</option>
+                <option value="this-month">This Month</option>
+            </select>
+        </div>
+        <ul id="top-performers">
+        </ul>
+        <div class="error-message" id="top-performers-error"></div>
+    </div>
+</div>
+
+<!-- Pending Orders Section -->
+<div class="section pending-orders-section">
+    <div class="section-header">
+        <h2><i class="fas fa-clock"></i> Pending Orders Overview</h2>
+    </div>
+    <div class="table-wrapper">
+        <table id="pending-orders-table" class="modern-table">
+            <thead>
+                <tr class="table-header">
+                    <th class="border p-3 text-left">Order ID</th>
+                    <th class="border p-3 text-left">Customer Name</th>
+                    <th class="border p-3 text-left">Salesperson</th>
+                    <th class="border p-3 text-left">Order Date</th>
+                    <th class="border p-3 text-left">Total Amount</th>
+                    <th class="border p-3 text-left">Action</th>
+                </tr>
+            </thead>
+            <tbody id="pending-orders-body"></tbody>
+        </table>
+    </div>
+</div>
+
+
+<!-- Modal for Full-Page View -->
+    <div id="chartModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close">Close</button>
+            <canvas id="modalCanvas" class="modal-canvas"></canvas>
+        </div>
+    </div>
+
+    
+<!-- Custom JavaScript -->
+    <script src="{{ url_for('static', filename='js/chart.js') }}"></script>
+</body>
+</html>
